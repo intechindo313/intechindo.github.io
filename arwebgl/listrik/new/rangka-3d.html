@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AR 3D Object Viewer</title>
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <style>
+    body { 
+      margin: 0; 
+      overflow: hidden; 
+      background-color: #000; 
+    }
+  </style>
+</head>
+<body>
+  <a-scene embedded arjs>
+    <a-entity id="modelContainer" position="0 0 -5" scale="0.5 0.5 0.5" rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000" gesture-handler>
+      <a-entity gltf-model="url(rangka.glb)" scale="0.3 0.3 0.3"></a-entity>
+    </a-entity>
+
+    <a-light type="ambient" color="#ffffff" intensity="0.3"></a-light>
+    <a-light type="directional" color="#ffffff" intensity="0.5" position="0 20 20"></a-light> <!-- Key Light -->
+    <a-light type="directional" color="#ffffff" intensity="0.6" position="20 10 0"></a-light>  <!-- Fill Light -->
+    <a-light type="directional" color="#ffffff" intensity="0.6" position="-20 10 0"></a-light> <!-- Back Light -->
+    <a-light type="directional" color="#ffffff" intensity="0.6" position="0 -20 0"></a-light> <!-- Bottom Light -->
+    <a-light type="directional" color="#ffffff" intensity="0.4" position="10 30 30"></a-light> <!-- Additional Light 1 -->
+    <a-light type="directional" color="#ffffff" intensity="0.4" position="-10 30 30"></a-light> <!-- Additional Light 2 -->
+    <a-light type="directional" color="#ffffff" intensity="0.4" position="0 30 -30"></a-light> <!-- Additional Light 3 -->
+
+    <a-entity camera></a-entity>
+  </a-scene>
+  
+  <script>
+    // Gesture handler for rotation and scaling
+    AFRAME.registerComponent('gesture-handler', {
+      schema: { type: 'selector' },
+
+      init: function () {
+        this.el.addEventListener('touchmove', this.onTouchMove.bind(this));
+        this.el.addEventListener('touchstart', this.onTouchStart.bind(this));
+      },
+
+      onTouchStart: function (event) {
+        if (event.touches.length === 2) {
+          this.startDistance = this.getDistance(event.touches[0], event.touches[1]);
+          this.startScale = this.el.getAttribute('scale');
+          this.startRotation = this.el.getAttribute('rotation');
+        }
+      },
+
+      onTouchMove: function (event) {
+        if (event.touches.length === 2) {
+          const currentDistance = this.getDistance(event.touches[0], event.touches[1]);
+          const scaleChange = currentDistance / this.startDistance;
+          const newScale = {
+            x: this.startScale.x * scaleChange,
+            y: this.startScale.y * scaleChange,
+            z: this.startScale.z * scaleChange
+          };
+          this.el.setAttribute('scale', newScale);
+        }
+        if (event.touches.length === 1) {
+          const touch = event.touches[0];
+          const rotationDelta = {
+            x: touch.clientY - this.startRotation.x,
+            y: touch.clientX - this.startRotation.y
+          };
+          const newRotation = {
+            x: this.startRotation.x + rotationDelta.x,
+            y: this.startRotation.y + rotationDelta.y,
+            z: this.startRotation.z
+          };
+          this.el.setAttribute('rotation', newRotation);
+        }
+      },
+
+      getDistance: function (touch1, touch2) {
+        const dx = touch1.clientX - touch2.clientX;
+        const dy = touch1.clientY - touch2.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+      }
+    });
+  </script>
+</body>
+</html>

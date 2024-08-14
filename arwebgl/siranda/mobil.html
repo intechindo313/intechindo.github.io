@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AR 3D Object Viewer</title>
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <style>
+    body { 
+      margin: 0; 
+      overflow: hidden; 
+      background-color: #000; 
+      font-family: Arial, sans-serif;
+    }
+    .button-container {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      justify-content: space-around;
+      width: 80%;
+      z-index: 10;
+    }
+    .button-container img {
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      border: 2px solid #fff;
+      border-radius: 5px;
+      transition: transform 0.2s;
+    }
+    .button-container img:hover {
+      transform: scale(1.1);
+    }
+    #placeholder {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 350px;
+      height: 300px;
+      z-index: 20;
+    }
+  </style>
+</head>
+<body>
+  <!-- Placeholder image -->
+  <img id="placeholder" src="lost.png" alt="Placeholder">
+
+  <!-- Buttons at the top -->
+  <div class="button-container">
+    <img id="lampu_jauh" src="lampu_jauh.png" alt="Lampu Jauh" onclick="swapModel('lampu-jauh.glb', 'marker1')">
+    <img id="lampu_dekat" src="lampu_dekat.png" alt="Lampu Dekat" onclick="swapModel('lampu-dekat.glb', 'marker1')">
+    <img id="sen_kiri" src="sen_kiri.png" alt="Sen Kiri" onclick="swapModel('sen-kiri.glb', 'marker2')">
+    <img id="sen_kanan" src="sen_kanan.png" alt="Sen Kanan" onclick="swapModel('sen-kanan.glb', 'marker2')">
+    <img id="lampu_belakang" src="lampu_belakang.png" alt="Lampu Belakang" onclick="swapModel('lampu-belakang.glb', 'marker3')">
+  </div>
+
+  <a-scene embedded arjs>
+    <!-- Marker 1 -->
+    <a-marker type="pattern" url="marker1.patt" id="marker1">
+      <a-entity id="modelContainer1" position="0 0 0" rotation="0 0 0">
+        <a-entity id="defaultModel1" gltf-model="url(mobil1.glb)" scale="0.3 0.3 0.3"></a-entity>
+      </a-entity>
+    </a-marker>
+
+    <!-- Marker 2 -->
+    <a-marker type="pattern" url="marker2.patt" id="marker2">
+      <a-entity id="modelContainer2" position="0 0 0" rotation="0 0 0">
+        <a-entity id="defaultModel2" gltf-model="url(mobil1.glb)" scale="0.3 0.3 0.3"></a-entity>
+      </a-entity>
+    </a-marker>
+
+    <!-- Marker 3 -->
+    <a-marker type="pattern" url="marker3.patt" id="marker3">
+      <a-entity id="modelContainer3" position="0 0 0" rotation="0 0 0">
+        <a-entity id="defaultModel3" gltf-model="url(mobil1.glb)" scale="0.3 0.3 0.3"></a-entity>
+      </a-entity>
+    </a-marker>
+
+    <a-light type="ambient" color="#ffffff" intensity="0.4"></a-light>
+    <a-light type="directional" color="#ffffff" intensity="0.4" position="0 20 20"></a-light> <!-- Key Light -->
+    <a-light type="directional" color="#ffffff" intensity="0.6" position="20 10 0"></a-light>  <!-- Fill Light -->
+    <a-light type="directional" color="#ffffff" intensity="0.6" position="-20 10 0"></a-light> <!-- Back Light -->
+    <a-light type="directional" color="#ffffff" intensity="0.6" position="0 -20 0"></a-light> <!-- Bottom Light -->
+    <a-light type="directional" color="#ffffff" intensity="0.4" position="10 30 30"></a-light> <!-- Additional Light 1 -->
+    <a-light type="directional" color="#ffffff" intensity="0.5" position="-10 30 30"></a-light> <!-- Additional Light 2 -->
+    <a-light type="directional" color="#ffffff" intensity="0.4" position="0 30 -30"></a-light> <!-- Additional Light 3 -->
+
+    <a-entity camera></a-entity>
+  </a-scene>
+
+  <script>
+    // Function to swap the model based on the button click
+    function swapModel(glbUrl, markerId) {
+      const container = document.getElementById(`modelContainer${markerId.slice(-1)}`);
+      while (container.firstChild) {
+        container.removeChild(container.firstChild);
+      }
+      const model = document.createElement('a-entity');
+      model.setAttribute('gltf-model', `url(${glbUrl})`);
+      model.setAttribute('scale', '0.3 0.3 0.3');
+      model.setAttribute('position', '0 0 0');
+      model.setAttribute('rotation', '0 0 0');
+      container.appendChild(model);
+    }
+
+    function handleMarkerFound(event) {
+      const markerId = event.target.id;
+      if (markerId === 'marker1') {
+        document.getElementById('lampu_jauh').style.display = 'block';
+        document.getElementById('lampu_dekat').style.display = 'block';
+      }
+      if (markerId === 'marker2') {
+        document.getElementById('sen_kiri').style.display = 'block';
+        document.getElementById('sen_kanan').style.display = 'block';
+      }
+      if (markerId === 'marker3') {
+        document.getElementById('lampu_belakang').style.display = 'block';
+      }
+      document.getElementById('placeholder').style.display = 'none'; // Hide placeholder
+    }
+
+    function handleMarkerLost(event) {
+      const markerId = event.target.id;
+      if (markerId === 'marker1') {
+        document.getElementById('lampu_jauh').style.display = 'none';
+        document.getElementById('lampu_dekat').style.display = 'none';
+      }
+      if (markerId === 'marker2') {
+        document.getElementById('sen_kiri').style.display = 'none';
+        document.getElementById('sen_kanan').style.display = 'none';
+      }
+      if (markerId === 'marker3') {
+        document.getElementById('lampu_belakang').style.display = 'none';
+      }
+
+      setTimeout(() => {
+        const isAnyMarkerVisible = ['marker1', 'marker2', 'marker3'].some(markerId => {
+          return document.querySelector(`#${markerId}`).object3D.visible;
+        });
+        if (!isAnyMarkerVisible) {
+          document.getElementById('placeholder').style.display = 'block'; // Show placeholder
+        }
+      }, 500); // Delay to avoid flickering, adjust as needed
+    }
+
+    // Show placeholder initially
+    document.getElementById('placeholder').style.display = 'block';
+    document.getElementById('lampu_jauh').style.display = 'none';
+    document.getElementById('lampu_dekat').style.display = 'none';
+    document.getElementById('sen_kiri').style.display = 'none';
+    document.getElementById('sen_kanan').style.display = 'none';
+    document.getElementById('lampu_belakang').style.display = 'none';
+
+    // Add event listeners for markers
+    document.querySelector('#marker1').addEventListener('markerFound', handleMarkerFound);
+    document.querySelector('#marker1').addEventListener('markerLost', handleMarkerLost);
+    document.querySelector('#marker2').addEventListener('markerFound', handleMarkerFound);
+    document.querySelector('#marker2').addEventListener('markerLost', handleMarkerLost);
+    document.querySelector('#marker3').addEventListener('markerFound', handleMarkerFound);
+    document.querySelector('#marker3').addEventListener('markerLost', handleMarkerLost);
+  </script>
+</body>
+</html>
